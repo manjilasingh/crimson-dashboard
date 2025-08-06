@@ -63,7 +63,6 @@ const Header = () => {
     const timeout = setTimeout(() => {
       setActiveDropdown(null);
     }, 250);
-      // waits for some time before the drop down disappears
     setHoverTimeout(timeout);
   };
 
@@ -71,54 +70,56 @@ const Header = () => {
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
-  const renderSimpleDropdown = (subItems) => {
-    return (
-      <div className="absolute z-10 mt-2 bg-white rounded-lg shadow-lg w-54">
-        <div className="p-3">
-          {subItems.map((item, index) => (
-            <div key={index} className="px-3">
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-gray-800 hover:text-red-700"
-              >
-                {item.name}
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  const renderDropdownContent = (activeItem) => {
+    if (!activeItem) return null;
 
-  const renderMultiColumnDropdown = (subItems) => {
-    return (
-      <div className="absolute z-10 mt-2 bg-white rounded-lg shadow-lg w-150">
-        <div className="p-4">
-          <div className="grid grid-cols-3 gap-6">
-            {subItems.map((item, index) => (
-              <div key={index}>
-                <h3 className="font-semibold text-gray-900 p-2">{item.name}</h3>
-                <div className="space-y-1">
-                  {item.subItems.map((subItem, subIndex) => (
-                    <a
-                      key={subIndex}
-                      href={subItem.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between p-2 text-sm text-gray-600 hover:text-red-700"
-                    >
-                      <span>{subItem.name}</span>
-                    </a>
-                  ))}
+    if (activeItem.isMultiColumn) {
+      return (
+        <div className="p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-3 gap-8">
+              {activeItem.subItems.map((item, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-gray-900 mb-3 pl-2 text-md">{item.name}</h3>
+                  <div className="space-y-2">
+                    {item.subItems.map((subItem, subIndex) => (
+                      <a
+                        key={subIndex}
+                        href={subItem.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-2 text-md text-gray-600 hover:text-red-700 rounded hover:bg-gray-50"
+                      >
+                        <span>{subItem.name}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="p-4">
+          <div className="max-w-4xl mx-auto">
+            {activeItem.subItems.map((item, index) => (
+              <div key={index} className="px-3 py-2">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-gray-800 hover:text-red-700 font-medium"
+                >
+                  {item.name}
+                </a>
               </div>
             ))}
           </div>
         </div>
-      </div>
-    );
+      );
+    }
   };
 
   return (
@@ -129,7 +130,7 @@ const Header = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-white">Crimson Dashboard</h1>
           </div>
           
-          <nav className="hidden lg:flex justify-center flex-1">
+          <nav className="hidden lg:flex justify-center flex-1 relative">
             <ul className="flex space-x-6">
               {navigationItems.map((item, index) => (
                 <li
@@ -148,22 +149,20 @@ const Header = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m1 1 4 4 4-4"/>
                     </svg>
                   </button>
-                  
-                  {activeDropdown === index && (
-                    <div 
-                      className="absolute top-full left-0"
-                      onMouseEnter={() => handleMouseEnter(index)}
-                      onMouseLeave={handleMouseLeave}
-                    >
-                      {item.isMultiColumn 
-                        ? renderMultiColumnDropdown(item.subItems)
-                        : renderSimpleDropdown(item.subItems)
-                      }
-                    </div>
-                  )}
                 </li>
               ))}
             </ul>
+            
+            {/* Unified dropdown menu */}
+            {activeDropdown !== null && (
+              <div 
+                className="absolute center z-10 mt-16 bg-white rounded-lg shadow-lg w-150"
+                onMouseEnter={() => handleMouseEnter(activeDropdown)}
+                onMouseLeave={handleMouseLeave}
+              >
+                {renderDropdownContent(navigationItems[activeDropdown])}
+              </div>
+            )}
           </nav>
 
           {/* Mobile menu button */}
